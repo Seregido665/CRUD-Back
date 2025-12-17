@@ -52,11 +52,12 @@ const bookSchema = new mongoose.Schema({
   }
 }, {
   // MONGO GENERA UN ID PERO ASI: _id
-  // CON ESTE .json
+  // Para cambiarlo:
   toJSON: {
     transform: (doc, ret) => {
       ret.id = ret._id; // Pasamos '_id' a 'id'
       delete ret._id;   // Eliminamos '_id'
+      delete ret.__v;      // Y '__v'
     }
   }
 });
