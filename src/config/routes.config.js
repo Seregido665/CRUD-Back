@@ -5,7 +5,7 @@ const router = express.Router();
 // -- Aqui traemos las operacion especificas de cada MODEL --
 const booksController = require("../controllers/book.controller");
 const usersController = require("../controllers/users.controller");
-const librariesController = require("../controllers/libraries.controller");
+//const librariesController = require("../controllers/libraries.controller");
 
 // -- Y aqui las rutas especificas de cada llamada --
 // --- BOOKS ---
@@ -20,6 +20,9 @@ router.patch("/books/:id", booksController.updateBook);
 router.post("/register", usersController.registerUser);
 router.get("/users", usersController.getUsers);
 router.post("/login", usersController.loginUser);
+router.get("/user/:id", usersController.getUserById);
+router.delete("/user/:id", usersController.deleteUser);
+router.patch("/user/:id", usersController.updateUser);
 
 // --- LIBRARIES --- 
 //router.get("/libraries", librariesController.getLibraries);

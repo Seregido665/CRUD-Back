@@ -11,7 +11,10 @@ module.exports.registerUser = async (req, res) => {
     // - Comprueba si el usuario existe -
     const existingUser = await UserModel.findOne({ email: newUser.email });
     if (existingUser) {
-      return res.status(400).json({ message: "El usuario ya existe" });
+      return res.status(422).json({
+        errors: { email: { message: "El email ya está registrado" }
+        }
+      });
     }
 
     // - Si no hay, crea el nuevo usuario -
@@ -30,7 +33,7 @@ module.exports.registerUser = async (req, res) => {
     });
   } catch (err) {
     res
-      .status(500).json({ message: "Error al crear el usuario", error: err.message });
+      .json({ message: "El usuario se jode" });
   }
 };
 
@@ -76,6 +79,46 @@ module.exports.getUsers = (req, res, next) => {
   UserModel.find()
     .then((users) => {
       res.json(users);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+};
+
+// - BUSCA UN USUARIO POR id -
+module.exports.getUserById = (req, res, next) => {
+  const id = req.params.id;
+
+  UserModel.findById(id)
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+};
+
+// -- BORRAR UN USUARIO :React ---
+module.exports.deleteUser = (req, res, next) => {
+  const id = req.params.id;
+
+  UserModel.findByIdAndDelete(id)
+    .then(() => {
+      res.json("Book deleted successfully");
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+};
+
+// -- ACTUALIZAR UN USUARIO :React --
+module.exports.updateUser = (req, res, next) => {
+  const id = req.params.id;
+  const updates = req.body;
+
+  UserModel.findByIdAndUpdate(id, updates, { new: true })
+    .then((user) => {
+      res.json(user);
     })
     .catch((err) => {
       res.json(err);

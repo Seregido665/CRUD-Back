@@ -1,26 +1,37 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
+    required: [true, "El nombre es requerido!"],
   },
   email: {
     type: String,
-    required: true,
+    required: [true, "El email es requerido!"],
     match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
     unique: true,
   },
   password: {
     type: String,
     required: [true, "La contraseña es requerida!"],
-    minLength: [8, "Almenos 8 caracteres!"],
+    minLength: [8, "Al menos 8 caracteres!"],
   },
+}, {
+  // MONGO GENERA UN ID PERO ASI: _id
+  // Para cambiarlo:
+  toJSON: {
+    transform: (doc, ret) => {
+      ret.id = ret._id; // Pasamos '_id' a 'id'
+      delete ret._id;   // Eliminamos '_id'
+      delete ret.__v;      // Y '__v'
+    }
+  }
 });
 
 
-/*
+
 // --- HASHEO DE contraseñas --> SOLO PARA React ---
-// .pre PARA INDICAR QUE SE HACE ANTES DE save
 userSchema.pre("save", function (next) {   
   const user = this;
 
@@ -33,13 +44,8 @@ userSchema.pre("save", function (next) {
   // VALOR ALEATORIO UNICO A MI CONTRASEÑA
   // CON 10 RONDAS DE ENCRIPTACION.
   const salt = bcrypt.genSaltSync(10);
-
-  // ENCRIPTA LA CONTRASEÑA
   const hashedPassword = bcrypt.hashSync(user.password, salt);
-  
-  // Y CAMBIAMOS NUESTRA CONTRASEÑA POR EL hasheo RESULTANTE
   user.password = hashedPassword;
 });
-*/
 
 module.exports = mongoose.model("User", userSchema);
