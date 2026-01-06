@@ -73,8 +73,8 @@ module.exports.updateBook = (req, res, next) => {
   const updates = req.body;
 
   BookModel.findByIdAndUpdate(id, updates, { new: true })
-    .then((updatedBook) => {
-      res.json(updatedBook);
+    .then((book) => {
+      res.json(book);
     })
     .catch((err) => {
       res.json(err);

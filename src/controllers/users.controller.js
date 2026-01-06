@@ -42,12 +42,6 @@ module.exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // - Por si falta algun campo -
-    if (!email || !password) {
-      return res
-        .status(400).json({ message: "Email y contraseña requeridos" });
-    }
-
     // - Por si los datos son incorrectos
     const user = await UserModel.findOne({ email });
     if (!user) {
