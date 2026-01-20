@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
   const newUser = req.body;
   const userEmail = newUser.email;
 
+<<<<<<< HEAD
   UserModel.findOne({ email: userEmail })
     .then((user) => {
       if (!user) {
@@ -21,6 +22,73 @@ const bcrypt = require("bcryptjs");
       } else {
         res.status(422).json({ message: "El usuario ya existe" });
       }
+=======
+    // - Comprueba si el usuario existe -
+    const existingUser = await UserModel.findOne({ email: newUser.email });
+    if (existingUser) {
+      return res.status(422).json({
+        errors: { email: { message: "El email ya está registrado" }
+        }
+      });
+    }
+
+    // - Si no hay, crea el nuevo usuario -
+    const user = await UserModel.create(newUser);
+
+    // - POR SEGURIDAD, no devolvemos la contraseña en la respuesta
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    };
+
+    res.status(201).json({
+      message: "Usuario creado correctamente",
+      user: userResponse,
+    });
+  } catch (err) {
+    res
+      .json({ message: "El usuario se jode" });
+  }
+};
+
+// -- INICIAR SESION --
+module.exports.loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // - Por si los datos son incorrectos
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Credenciales incorrectas" });
+    }
+    const isPasswordValid = bcrypt.compareSync(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Credenciales incorrectas" });
+    }
+
+    // - Si son correctos, POR SEGURIDAD, no devolvemos la contraseña en la respuesta
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+    };
+
+    res.status(200).json({
+      message: "Login exitoso",
+      user: userResponse,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error en el login", error: err.message });
+  }
+};
+
+// - MUESTRA TODOS LOS USUARIOS -
+module.exports.getUsers = (req, res, next) => {
+  UserModel.find()
+    .then((users) => {
+      res.json(users);
+>>>>>>> 78cac6b65cb27ce90b5a326d60e7a0ab68288c75
     })
     .catch((err) => {
       return res.status(400).json(err);
