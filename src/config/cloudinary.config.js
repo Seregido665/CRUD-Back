@@ -1,5 +1,5 @@
 const cloudinary = require("cloudinary").v2;
-const CloudinaryStorage = require("multer-storage-cloudinary");
+const CloudinaryStorage = require("multer-storage-cloudinary").CloudinaryStorage;
 const multer = require("multer");
 
 // CLUDINARY → Servicio en la nube para almacenar, transformar y mostrar imágenes y vídeos.

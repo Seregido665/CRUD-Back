@@ -1,4 +1,5 @@
 const BookModel = require("../models/Book.model");
+const cloudinary = require("../config/cloudinary.config");
 
 // --- CONJUNTO DE OPERACIONES HECHAS CON LA BASE DE DATOS "books" ---
 // ----- A --> routes.config.js
@@ -94,7 +95,6 @@ module.exports.updateBook = async (req, res, next) => {
     const id = req.params.id;
     const updates = req.body;
 
-<<<<<<< HEAD
     if (req.file) {
       // 1.- Obtener el libro para eliminar la imagen
       const currentBook = await BookModel.findById(id);
@@ -119,13 +119,4 @@ module.exports.updateBook = async (req, res, next) => {
   } catch (err) {
     res.status(500).json({ message: "Error al actualizar libro", error: err.message });
   }
-=======
-  BookModel.findByIdAndUpdate(id, updates, { new: true })
-    .then((book) => {
-      res.json(book);
-    })
-    .catch((err) => {
-      res.json(err);
-    });
->>>>>>> 78cac6b65cb27ce90b5a326d60e7a0ab68288c75
 };
