@@ -17,6 +17,7 @@ const app = express();
       // --- CONFIGURACIÓN CORS ---
 const cors = require("cors");
 app.use(cors()); // <-- Aquí lo añadimos
+
 app.use(express.json()); // middleware para parsear JSON
 
       // --- CONEXION A LA BASE DE DATOS DE MongoDB:  ->  mongo.config.js  <---

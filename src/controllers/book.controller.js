@@ -1,5 +1,4 @@
 const BookModel = require("../models/Book.model");
-const UserModel = require("../models/User.model");
 
 // --- CONJUNTO DE OPERACIONES HECHAS CON LA BASE DE DATOS "books" ---
 // ----- A --> routes.config.js
@@ -45,38 +44,78 @@ module.exports.getBookById = (req, res, next) => {
 module.exports.createBook = (req, res, next) => {
   const newBook = req.body;
 
+  // SI SE SUBE UNA IMAGEN --> agregar la URL y el public_id
+  if (req.file) {
+    newBook.image = req.file.path; // URL de Cloudinary
+    newBook.imagePublicId = req.file.filename; // Public ID de Cloudinary
+  }
+
   BookModel.create(newBook)
     .then((bookCreated) => {
-      res.json("Book created successfully!!");
+      res.status(201).json({ message: "Libro creado exitosamente", book: bookCreated });
     })
     .catch((err) => {
-      res.json(err);
+      res.status(500).json({ message: "Error al crear libro", error: err.message });
     });
-};
+}
+
 
 // -- BORRAR UN LIBRO :React ---
-module.exports.deleteBook = (req, res, next) => {
-  const id = req.params.id;
+// USAMOS try - catch CON async - await PARA RESPETAR EL ORDEN DE LAS OPERACIONES
+// DEBIDO A QUE HAY UNA IMAGEN SOBRETODO.
+module.exports.deleteBook = async (req, res, next) => {
+  try {
+    const id = req.params.id;
 
-  BookModel.findByIdAndDelete(id)
-    .then(() => {
-      res.json("Book deleted successfully");
-    })
-    .catch((err) => {
-      res.json(err);
-    });
+    // 1.- Obtener el libro para eliminar la imagen de Cloudinary
+    const book = await BookModel.findById(id);
+
+    if (!book) {
+      return res.status(404).json({ message: "Libro no encontrado" });
+    }
+    // 2.- Si el libro tiene una imagen, eliminarla de Cloudinary
+    if (book.imagePublicId) {
+      await cloudinary.uploader.destroy(book.imagePublicId);
+    }
+
+    // 3.- Eliminar el libro de la base de datos
+    await BookModel.findByIdAndDelete(id);
+
+    res.json({ message: "Libro eliminado exitosamente" });
+  } catch (err) {
+    res.status(500).json({ message: "Error al eliminar libro", error: err.message });
+  }
 };
 
 // -- ACTUALIZAR UN LIBRO :React --
-module.exports.updateBook = (req, res, next) => {
-  const id = req.params.id;
-  const updates = req.body;
+//    try - catch CON async - await PARA RESPETAR EL ORDEN DE LAS OPERACIONES
+module.exports.updateBook = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const updates = req.body;
 
-  BookModel.findByIdAndUpdate(id, updates, { new: true })
-    .then((updatedBook) => {
-      res.json(updatedBook);
-    })
-    .catch((err) => {
-      res.json(err);
-    });
+    if (req.file) {
+      // 1.- Obtener el libro para eliminar la imagen
+      const currentBook = await BookModel.findById(id);
+
+      // 2.- Si el libro tiene una imagen eliminarla de Cloudinary
+      if (currentBook && currentBook.imagePublicId) {
+        await cloudinary.uploader.destroy(currentBook.imagePublicId);
+      }
+
+      // 3.- Agregar la nueva imagen
+      updates.image = req.file.path;
+      updates.imagePublicId = req.file.filename;
+    }
+
+    const updatedBook = await BookModel.findByIdAndUpdate(id, updates, { new: true });
+
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Libro no encontrado" });
+    }
+
+    res.json({ message: "Libro actualizado exitosamente", book: updatedBook });
+  } catch (err) {
+    res.status(500).json({ message: "Error al actualizar libro", error: err.message });
+  }
 };

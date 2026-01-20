@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "El nombre es requerido!"],
   },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
   email: {
     type: String,
     required: [true, "El email es requerido!"],
@@ -19,30 +24,36 @@ const userSchema = new mongoose.Schema({
   },
 }, {
   // MONGO GENERA UN ID PERO ASI: _id
-  // Para cambiarlo:
+  // Para cambiarlo en el JSON:
   toJSON: {
+    virtuals: true,
     transform: (doc, ret) => {
       ret.id = ret._id; // Pasamos '_id' a 'id'
-      delete ret._id;   // Eliminamos '_id'
-      delete ret.__v;      // Y '__v'
-    }
+      delete ret.password; // Eliminamos 'password'
+      delete ret._id;      
+      delete ret.__v;     
+    } 
   }
 });
 
+userSchema.virtual("books", {
+  ref: "Book",
+  localField: "_id",
+  foreignField: "user",
+  justOne: false,
+});
 
 
 // --- HASHEO DE contraseñas --> SOLO PARA React ---
 userSchema.pre("save", function (next) {   
   const user = this;
 
-  // PARA COMPROBAR QUE NO SE HA CAMBIADO LA CONTRASEÑA
-  // Y QUE NO SE hashee DE NUEVO.
+  // PARA COMPROBAR QUE NO SE HA CAMBIADO LA CONTRASEÑA Y QUE NO SE hashee DE NUEVO.
   if (!user.isModified("password")) {  
     return next();
   }
 
-  // VALOR ALEATORIO UNICO A MI CONTRASEÑA
-  // CON 10 RONDAS DE ENCRIPTACION.
+  // VALOR ALEATORIO UNICO A MI CONTRASEÑA CON 10 RONDAS DE ENCRIPTACION.
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(user.password, salt);
   user.password = hashedPassword;

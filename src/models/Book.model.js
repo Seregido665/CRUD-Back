@@ -9,9 +9,19 @@ const bookSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  year: Number,
+  year: {
+      type: Number,
+  },
+  image: {
+      type: String, // URL de la imagen en Cloudinary
+      default: null,
+    },
+  imagePublicId: {
+    type: String, // ID público de Cloudinary para poder eliminar la imagen
+    default: null,
+  },
   user: { 
-    type: String, 
+    type: mongoose.Schema.Types.ObjectId,
     required: true 
   }
 }, {

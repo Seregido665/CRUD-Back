@@ -4,41 +4,17 @@ const librarySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
-  },
-  address: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-  },
+  }
+}, {
+  // MONGO GENERA UN ID PERO ASI: _id
+  // Para cambiarlo:
+  toJSON: {
+    transform: (doc, ret) => {
+      ret.id = ret._id; // Pasamos '_id' a 'id'
+      delete ret._id;   // Eliminamos '_id'
+      delete ret.__v;      // Y '__v'
+    }
+  }
 });
 
 module.exports = mongoose.model("Library", librarySchema);
-
-
-
-
-
-/*
-[
-  {
-    "libraryName": "Libreria de Ejemplo",
-    "location": "Calle Falsa 123, Ciudad Ejemplo",
-    "booksAvailable": 5000,
-    "openHours": "9:00 AM - 6:00 PM"
-  },
-  {
-    "libraryName": "Biblioteca Central",
-    "location": "Avenida Principal 456, Ciudad Central",
-    "booksAvailable": 12000,
-    "openHours": "8:00 AM - 8:00 PM"
-  },
-  {
-    "libraryName": "Librería del Barrio",
-    "location": "Calle Secundaria 789, Barrio Alegre",
-    "booksAvailable": 3000,
-    "openHours": "10:00 AM - 5:00 PM"
-  }
-]
-*/
